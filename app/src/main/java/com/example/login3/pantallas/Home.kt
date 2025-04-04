@@ -59,17 +59,30 @@ fun mostrarNavegador(navController: NavController, selectedScreen: String) {
         modifier = Modifier.fillMaxSize(), // Para que la barra de navegación se posicione en la parte inferior
         contentAlignment = Alignment.BottomCenter // Alinea el Row en la parte inferior
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 30.dp),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            NavigationItem("Comidas", R.drawable.comidas, navController, selectedScreen, iconSize)
-            NavigationItem("Ejercicios", R.drawable.ejercicios, navController, selectedScreen, iconSize)
-            NavigationItem("Home", R.drawable.entrenar, navController, selectedScreen, iconSize)
-            NavigationItem("Historial", R.drawable.historial, navController, selectedScreen, iconSize)
-            NavigationItem("Perfil", R.drawable.perfil, navController, selectedScreen, iconSize)
+
+        Column {
+            // Línea superior negra
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color.Black)
+
+            )
+
+            // El Row del navegador
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 30.dp, top = 5.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                NavigationItem("Comidas", R.drawable.comidas, navController, selectedScreen, iconSize)
+                NavigationItem("Ejercicios", R.drawable.ejercicios, navController, selectedScreen, iconSize)
+                NavigationItem("Home", R.drawable.entrenar, navController, selectedScreen, iconSize)
+                NavigationItem("Historial", R.drawable.historial, navController, selectedScreen, iconSize)
+                NavigationItem("Perfil", R.drawable.perfil, navController, selectedScreen, iconSize)
+            }
         }
     }
 }

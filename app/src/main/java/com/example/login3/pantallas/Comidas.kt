@@ -1,78 +1,98 @@
 package com.example.login3.pantallas
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.navigation.NavController
 import com.example.login3.R
 
 @Composable
 fun mostrarComidas(navController: NavController) {
-    mostrarNavegador(navController, "Comidas")
-
-    // Obtiene la configuración de la pantalla
     val screenWidth = LocalConfiguration.current.screenWidthDp
-    val density = LocalDensity.current.density
+    val padding = 16.dp
+    val textSize = if (screenWidth < 400) 16.sp else 20.sp
 
-    // Ajuste dinámico de los tamaños
-    val padding = 16.dp // Compose se encarga de convertir esto en función de la densidad
-    val textSize = if (screenWidth < 400) 16.sp else 20.sp // Reducimos el tamaño de texto en pantallas más pequeñas
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Contenido principal (LazyColumn)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = padding,
+                    top = padding,
+                    end = padding,
+                    bottom = 100.dp // Deja espacio para el navegador
+                ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Text("DESAYUNOS", modifier = Modifier.padding(8.dp), fontSize = textSize)
+                LazyRow {
+                    itemsIndexed(ImagenesPlatos.subList(14, 21)) { index, image ->
+                        val globalIndex = index + 14
+                        ListaItem(image, titulosPlatos[globalIndex], screenWidth) {
+                            navController.navigate("detalleComida/$globalIndex")
+                        }
+                    }
+                }
+            }
 
-    // Ajustamos el LazyColumn para que no tape el navegador inferior
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxHeight() // Esto hará que ocupe todo el espacio disponible pero sin sobrepasar
-            .padding(start = padding, top = padding, end = padding, bottom = 80.dp), // Ajuste dinámico del padding
-        verticalArrangement = Arrangement.spacedBy(16.dp) // Espacio entre los elementos
-    ) {
-        item {
-            Text("DESAYUNOS", modifier = Modifier.padding(8.dp), fontSize = textSize)
-            LazyRow {
-                itemsIndexed(ImagenesPlatos.subList(14, 21)) { index, image ->
-                    ListaItem(image, titulosPlatos[index + 14], screenWidth)
+            item {
+                Text("COMIDAS", modifier = Modifier.padding(8.dp), fontSize = textSize)
+                LazyRow {
+                    itemsIndexed(ImagenesPlatos.subList(7, 14)) { index, image ->
+                        val globalIndex = index + 7
+                        ListaItem(image, titulosPlatos[globalIndex], screenWidth) {
+                            navController.navigate("detalleComida/$globalIndex")
+                        }
+                    }
+                }
+            }
+
+            item {
+                Text("CENAS", modifier = Modifier.padding(8.dp), fontSize = textSize)
+                LazyRow {
+                    itemsIndexed(ImagenesPlatos.subList(0, 7)) { index, image ->
+                        ListaItem(image, titulosPlatos[index], screenWidth) {
+                            navController.navigate("detalleComida/$index")
+                        }
+                    }
                 }
             }
         }
 
-        item {
-            Text("COMIDAS", modifier = Modifier.padding(8.dp), fontSize = textSize)
-            LazyRow {
-                itemsIndexed(ImagenesPlatos.subList(7, 14)) { index, image ->
-                    ListaItem(image, titulosPlatos[index + 7], screenWidth)
-                }
-            }
-        }
-
-        item {
-            Text("CENAS", modifier = Modifier.padding(8.dp), fontSize = textSize)
-            LazyRow {
-                itemsIndexed(ImagenesPlatos.subList(0, 7)) { index, image ->
-                    ListaItem(image, titulosPlatos[index], screenWidth)
-                }
-            }
-        }
+        // Navegador inferior fijo
+        mostrarNavegador(navController, "Comidas")
     }
 }
 
 
 @Composable
-fun ListaItem(image: Int, title: String, screenWidth: Int) {
-    // Calculamos el tamaño de la imagen y el título en función del tamaño de la pantalla
-    val imageSize = if (screenWidth < 400) 100.dp else 140.dp // Reducción en pantallas pequeñas
+fun ListaItem(image: Int, title: String, screenWidth: Int, onClick: () -> Unit) {
+    val imageSize = if (screenWidth < 400) 100.dp else 140.dp
     val titleWidth = if (screenWidth < 400) 100.dp else 120.dp
 
-    Column(modifier = Modifier.padding(8.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Image(
             painter = painterResource(id = image),
             contentDescription = title,
@@ -88,8 +108,6 @@ fun ListaItem(image: Int, title: String, screenWidth: Int) {
         )
     }
 }
-
-
 
 val ImagenesPlatos = listOf(
         R.drawable.cena_brochetas_pollo_verduras,
@@ -138,6 +156,165 @@ val ImagenesPlatos = listOf(
         "Wrap con tortilla francesa y verduras",
         "Yogur con avena y fruta"
     )
+
+data class InfoPlato(
+    val ingredientes: List<String>,
+    val carbohidratos: Double, // en gramos
+    val proteinas: Double,     // en gramos
+    val azucar: Double,        // en gramos
+    val grasa: Double          // en gramos
+)
+
+
+val infoPlatos = listOf(
+    InfoPlato(
+        listOf("Pollo", "Pimiento", "Calabacín", "Cebolla", "Aceite de oliva"),
+        carbohidratos = 10.0,
+        proteinas = 30.0,
+        azucar = 3.0,
+        grasa = 12.0
+    ),
+    InfoPlato(
+        listOf("Lechuga", "Pollo empanado", "Queso parmesano", "Salsa César", "Pan tostado"),
+        carbohidratos = 20.0,
+        proteinas = 25.0,
+        azucar = 2.0,
+        grasa = 18.0
+    ),
+    InfoPlato(
+        listOf("Huevos", "Patatas", "Espinacas", "Aceite de oliva"),
+        carbohidratos = 25.0,
+        proteinas = 20.0,
+        azucar = 1.5,
+        grasa = 15.0
+    ),
+    InfoPlato(
+        listOf("Pollo", "Brócoli", "Patatas", "Salsa barbacoa"),
+        carbohidratos = 30.0,
+        proteinas = 28.0,
+        azucar = 8.0,
+        grasa = 14.0
+    ),
+    InfoPlato(
+        listOf("Pollo", "Judías verdes", "Aceite de oliva", "Ajo"),
+        carbohidratos = 12.0,
+        proteinas = 26.0,
+        azucar = 2.0,
+        grasa = 10.0
+    ),
+    InfoPlato(
+        listOf("Salmón", "Espárragos", "Aceite de oliva", "Limón"),
+        carbohidratos = 5.0,
+        proteinas = 32.0,
+        azucar = 1.0,
+        grasa = 18.0
+    ),
+    InfoPlato(
+        listOf("Tortilla de trigo", "Salmón ahumado", "Pepino", "Queso crema"),
+        carbohidratos = 20.0,
+        proteinas = 18.0,
+        azucar = 2.0,
+        grasa = 14.0
+    ),
+    InfoPlato(
+        listOf("Arroz", "Gambas", "Brócoli", "Aceite de oliva"),
+        carbohidratos = 40.0,
+        proteinas = 22.0,
+        azucar = 1.5,
+        grasa = 10.0
+    ),
+    InfoPlato(
+        listOf("Arroz", "Garbanzos", "Salsa curry", "Pan naan"),
+        carbohidratos = 60.0,
+        proteinas = 18.0,
+        azucar = 4.0,
+        grasa = 15.0
+    ),
+    InfoPlato(
+        listOf("Arroz", "Pollo", "Brócoli", "Sésamo", "Salsa soja"),
+        carbohidratos = 35.0,
+        proteinas = 28.0,
+        azucar = 2.5,
+        grasa = 12.0
+    ),
+    InfoPlato(
+        listOf("Pasta", "Verduras variadas", "Queso feta o mozzarella"),
+        carbohidratos = 45.0,
+        proteinas = 15.0,
+        azucar = 3.0,
+        grasa = 10.0
+    ),
+    InfoPlato(
+        listOf("Fideos chinos", "Pollo", "Verduras salteadas", "Salsa teriyaki"),
+        carbohidratos = 50.0,
+        proteinas = 26.0,
+        azucar = 6.0,
+        grasa = 11.0
+    ),
+    InfoPlato(
+        listOf("Pasta", "Champiñones", "Espinacas", "Nata vegetal"),
+        carbohidratos = 40.0,
+        proteinas = 14.0,
+        azucar = 2.5,
+        grasa = 16.0
+    ),
+    InfoPlato(
+        listOf("Pimientos", "Carne picada vegetal o normal", "Arroz", "Tomate frito"),
+        carbohidratos = 30.0,
+        proteinas = 20.0,
+        azucar = 4.0,
+        grasa = 13.0
+    ),
+    InfoPlato(
+        listOf("Pan integral", "Huevos", "Guacamole", "Pesto"),
+        carbohidratos = 25.0,
+        proteinas = 18.0,
+        azucar = 2.0,
+        grasa = 17.0
+    ),
+    InfoPlato(
+        listOf("Huevos", "Cherrys", "Pan", "Guacamole"),
+        carbohidratos = 20.0,
+        proteinas = 16.0,
+        azucar = 2.5,
+        grasa = 15.0
+    ),
+    InfoPlato(
+        listOf("Huevos", "Espinacas", "Cherrys", "Aceite de oliva"),
+        carbohidratos = 10.0,
+        proteinas = 14.0,
+        azucar = 2.0,
+        grasa = 10.0
+    ),
+    InfoPlato(
+        listOf("Pan integral", "Guacamole", "Champiñones", "Aceite de oliva"),
+        carbohidratos = 22.0,
+        proteinas = 10.0,
+        azucar = 2.0,
+        grasa = 12.0
+    ),
+    InfoPlato(
+        listOf("Pan integral", "Huevos", "Guacamole", "Pesto"),
+        carbohidratos = 25.0,
+        proteinas = 18.0,
+        azucar = 2.0,
+        grasa = 17.0
+    ),
+    InfoPlato(
+        listOf("Tortilla francesa", "Verduras", "Tortilla de trigo"),
+        carbohidratos = 18.0,
+        proteinas = 15.0,
+        azucar = 2.0,
+        grasa = 11.0
+    ),
+    InfoPlato(
+        listOf("Yogur natural", "Copos de avena", "Fruta variada"),
+        carbohidratos = 30.0,
+        proteinas = 12.0,
+        azucar = 10.0,
+        grasa = 6.0
+    )
+)
 
 
 

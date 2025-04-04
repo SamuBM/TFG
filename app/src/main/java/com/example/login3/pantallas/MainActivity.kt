@@ -34,5 +34,10 @@ fun iniciar(){
        // composable("Videos") { mostrarVideos(navController) }
        // composable("Mi Rutina") { mostrarMiRutina(navController) }
         composable("Comidas"){ mostrarComidas(navController) }
+        composable("detalleComida/{index}") { backStackEntry ->
+            val index = backStackEntry.arguments?.getString("index")?.toInt() ?: 0
+            mostrarInfoComida(navController, index)
+        }
+
     }
 }
